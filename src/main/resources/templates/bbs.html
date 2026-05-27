@@ -20,6 +20,15 @@
       投稿内容：
       <div th:text="${article.content}">dummy</div>
       <br />
+      <div th:each="comment : ${article.commentList}">
+        コメント者名：
+        <span th:text="${comment.name}">dummy</span><br />
+        <br />
+        コメント内容：
+        <div th:text="${comment.content}">dummy</div>
+        <br />
+      </div>
+      <br />
       <hr />
       <br />
     </div>
