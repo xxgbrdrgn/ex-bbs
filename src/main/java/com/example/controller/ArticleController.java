@@ -36,10 +36,9 @@ public class ArticleController {
         articleList = articleRepository.findAll();
         for (Article article : articleList) {
             article.setCommentList(commentRepository.findByArticleId(article.getId()));
+        }
         model.addAttribute("articleList", articleList);
-
         return "bbs";
-
     }
 
     /**
