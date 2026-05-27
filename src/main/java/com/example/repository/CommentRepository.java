@@ -45,13 +45,19 @@ public class CommentRepository {
         return template.query(sql, param, COMMENT_ROW_MAPPER);
     }
 
+    /**
+     * 新しいコメントをcommentsテーブルに追加する.
+     *
+     * @param comment 新しいコメント
+     */
     public void save(Comment comment) {
         SqlParameterSource param = new BeanPropertySqlParameterSource(comment);
         if (comment.getId() == null) {
             String insertSql = """
-                    insert into comment(name, content)
-                    values(:name, :content)
+                    insert into comments(name, content, article_id)
+                    values(:name, :content, :articleId)
                     """;
+
             template.update(insertSql, param);
         }
     }

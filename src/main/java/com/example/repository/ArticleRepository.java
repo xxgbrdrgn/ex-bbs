@@ -40,6 +40,11 @@ public class ArticleRepository {
         return template.query(sql, ARTICLE_ROW_MAPPER);
     }
 
+    /**
+     * 新しい投稿をarticlesテーブルに追加する.
+     *
+     * @param article 新しい投稿
+     */
     public void save(Article article) {
         SqlParameterSource param = new BeanPropertySqlParameterSource(article);
         if (article.getId() == null) {
@@ -50,4 +55,5 @@ public class ArticleRepository {
             template.update(insertSql, param);
         }
     }
+    
 }

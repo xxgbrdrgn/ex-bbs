@@ -29,6 +29,12 @@
         <br />
       </div>
       <br />
+      <form action="bbs.html" th:action="@{/bbs/post-comment}" method="post">
+        <input type="hidden" name="articleId" th:value="${article.id}" />
+        <div>コメント者名：<input type="text" name="name" /></div>
+        <div>コメント内容：<textarea name="content" id=""></textarea></div>
+        <button type="submit">コメント投稿</button>
+      </form>
       <hr />
       <br />
     </div>

@@ -1,6 +1,7 @@
 package com.example.controller;
 
 import com.example.domain.Article;
+import com.example.domain.Comment;
 import com.example.repository.ArticleRepository;
 import com.example.repository.CommentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,6 +57,18 @@ public class ArticleController {
                 .content(content)
                 .build();
         articleRepository.save(article);
+        return "redirect:/bbs";
+    }
+
+    @PostMapping("post-comment")
+    public String postComment(Model model, String name, String content, int articleId) {
+        Comment comment = Comment.builder()
+                .name(name)
+                .content(content)
+                .articleId(articleId)
+                .build();
+        commentRepository.save(comment);
+        System.out.println(comment.toString());
         return "redirect:/bbs";
     }
 }
