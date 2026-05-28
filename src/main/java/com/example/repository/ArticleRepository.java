@@ -1,9 +1,11 @@
 package com.example.repository;
 
 import com.example.domain.Article;
+import com.example.domain.ArticleExtractor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Repository;
@@ -40,12 +42,46 @@ public class ArticleRepository {
         return template.query(sql, ARTICLE_ROW_MAPPER);
     }
 
+    public List<Article> findAllArticlesAndComments() {
+        ArticleExtractor articleExtractor = new ArticleExtractor();
+        String sql = """
+                 select a.id as article_id
+                 , a.name as article_name
+                 , a.content as article_content
+                 , c.id as comment_id
+                 , c.name as comment_name
+                 , c.content as comment_content
+                 from articles as a
+                left outer join comments as c
+                 on a.id = c.article_id
+                 order by a.id desc;
+                
+                """;
+        return template.query(sql, articleExtractor);
+    }
+
+    /**
+     * articlesテーブルからid指定でデータを取得する.
+     *
+     * @param id 記事ID
+     * @return 条件を満たす記事
+     */
+    public Article findById(Integer id) {
+        String sql = """
+                select id, name, content
+                from articles
+                where id = :id
+                """;
+        SqlParameterSource param = new MapSqlParameterSource().addValue("id", id);
+        return template.queryForObject(sql, param, ARTICLE_ROW_MAPPER);
+    }
+
     /**
      * 新しい投稿をarticlesテーブルに追加する.
      *
      * @param article 新しい投稿
      */
-    public void save(Article article) {
+    public void insert(Article article) {
         SqlParameterSource param = new BeanPropertySqlParameterSource(article);
         if (article.getId() == null) {
             String insertSql = """
@@ -55,5 +91,19 @@ public class ArticleRepository {
             template.update(insertSql, param);
         }
     }
-    
+
+    /**
+     * articlesテーブルからデータを削除する.
+     *
+     * @param id 削除する投稿のID
+     */
+    public void deleteById(int id) {
+        String deleteSql = """
+                delete from articles
+                where id = :id
+                """;
+        SqlParameterSource param = new MapSqlParameterSource().addValue("id", id);
+        template.update(deleteSql, param);
+
+    }
 }

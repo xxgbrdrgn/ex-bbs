@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -33,17 +32,17 @@ public class ArticleController {
      */
     @GetMapping("")
     public String index(Model model) {
-        List<Article> articleList = new ArrayList<>();
-        articleList = articleRepository.findAll();
-        for (Article article : articleList) {
-            article.setCommentList(commentRepository.findByArticleId(article.getId()));
-        }
+        List<Article> articleList = articleRepository.findAllArticlesAndComments();
+//        for (Article article : articleList) {
+//            article.setCommentList(commentRepository.findByArticleId(article.getId()));
+//        }
         model.addAttribute("articleList", articleList);
+        System.out.println(articleList.toString());
         return "bbs";
     }
 
     /**
-     * 記事をポストする.
+     * 記事を投稿する.
      *
      * @param model   モデル
      * @param name    ポストする投稿者名
@@ -56,10 +55,19 @@ public class ArticleController {
                 .name(name)
                 .content(content)
                 .build();
-        articleRepository.save(article);
+        articleRepository.insert(article);
         return "redirect:/bbs";
     }
 
+    /**
+     * コメントを投稿する.
+     *
+     * @param model     モデル
+     * @param name      コメント者名
+     * @param content   コメント内容
+     * @param articleId コメント先の投稿ID
+     * @return 記事一覧
+     */
     @PostMapping("post-comment")
     public String postComment(Model model, String name, String content, int articleId) {
         Comment comment = Comment.builder()
@@ -67,8 +75,21 @@ public class ArticleController {
                 .content(content)
                 .articleId(articleId)
                 .build();
-        commentRepository.save(comment);
-        System.out.println(comment.toString());
+        commentRepository.insert(comment);
+        return "redirect:/bbs";
+    }
+
+    /**
+     * 記事を削除する.
+     *
+     * @param model モデル
+     * @param id    ID
+     * @return 記事一覧画面
+     */
+    @PostMapping("delete-article")
+    public String deleteArticle(Model model, String id) {
+        commentRepository.deleteByArticleId(Integer.valueOf(id));
+        articleRepository.deleteById(Integer.parseInt(id));
         return "redirect:/bbs";
     }
 }

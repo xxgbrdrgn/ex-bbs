@@ -29,5 +29,5 @@ public class Article {
     /**
      * 投稿に対するコメント
      */
-    private List<Comment> commentList;
+    public List<Comment> commentList;
 }

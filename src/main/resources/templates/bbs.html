@@ -20,12 +20,20 @@
       投稿内容：
       <div th:text="${article.content}">dummy</div>
       <br />
+      <form action="bbs.html" th:action="@{/bbs/delete-article}" method="post">
+        <input type="hidden" th:value="${article.id}" name="id" />
+        <button type="submit">投稿削除</button>
+      </form>
       <div th:each="comment : ${article.commentList}">
         コメント者名：
-        <span th:text="${comment.name}">dummy</span><br />
+        <div th:if="${comment.name != null}">
+          <span th:text="${comment.name}">dummy</span>
+        </div>
         <br />
         コメント内容：
-        <div th:text="${comment.content}">dummy</div>
+        <div th:if="${comment.content != null}">
+          <span th:text="${comment.content}">dummy</span>
+        </div>
         <br />
       </div>
       <br />
