@@ -58,12 +58,27 @@
       >
         <input type="hidden" name="articleId" th:value="${article.id}" />
         <div>
-          <div th:errors="*{name}" style="color: red"></div>
-          コメント者名：<input type="text" name="name" th:field="*{name}" />
+          <div
+            th:if="${article.id == errorArticleId}"
+            th:errors="*{name}"
+            style="color: red"
+          ></div>
+
+          コメント者名：<input
+            th:if="${article.id == errorArticleId}"
+            type="text"
+            name="name"
+            th:field="*{name}"
+          />
         </div>
         <div>
-          <div th:errors="*{content}" style="color: red"></div>
+          <div
+            th:if="${article.id == errorArticleId}"
+            th:errors="*{content}"
+            style="color: red"
+          ></div>
           コメント内容：<textarea
+            th:if="${article.id == errorArticleId}"
             name="content"
             id=""
             th:field="*{content}"

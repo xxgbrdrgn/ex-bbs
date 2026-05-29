@@ -76,6 +76,7 @@ public class ArticleController {
     @PostMapping("insert-comment")
     public String insertComment(ArticleForm articleForm, @Validated CommentForm commentForm, BindingResult commentResult, Model model) {
         if (commentResult.hasErrors()) {
+            model.addAttribute("errorArticleId", Integer.valueOf(commentForm.getArticleId()));
             return index(model, articleForm, commentForm);
         }
         Comment comment = new Comment();
