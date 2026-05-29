@@ -1,12 +1,17 @@
 package com.example.controller;
 
 import com.example.domain.Article;
+import com.example.domain.ArticleForm;
 import com.example.domain.Comment;
+import com.example.domain.CommentForm;
 import com.example.repository.ArticleRepository;
 import com.example.repository.CommentRepository;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -31,29 +36,29 @@ public class ArticleController {
      * @return 記事一覧画面
      */
     @GetMapping("")
-    public String index(Model model) {
+    public String index(Model model, ArticleForm articleForm, CommentForm commentForm) {
         List<Article> articleList = articleRepository.findAllArticlesAndComments();
-//        for (Article article : articleList) {
-//            article.setCommentList(commentRepository.findByArticleId(article.getId()));
-//        }
         model.addAttribute("articleList", articleList);
-        System.out.println(articleList.toString());
         return "bbs";
     }
 
     /**
      * 記事を投稿する.
      *
-     * @param model   モデル
-     * @param name    ポストする投稿者名
-     * @param content ポストする投稿内容
-     * @return 記事一覧画面
+     * @param model         モデル
+     * @param articleForm   記事フォーム
+     * @param articleResult 記事エラーリスト
+     * @param commentForm   コメントフォーム
+     * @return 記事画面
      */
-    @PostMapping("post-article")
-    public String postArticle(Model model, String name, String content) {
+    @PostMapping("insert-article")
+    public String insertArticle(Model model, @Validated ArticleForm articleForm, BindingResult articleResult, CommentForm commentForm) {
+        if (articleResult.hasErrors()) {
+            return index(model, articleForm, commentForm);
+        }
         Article article = Article.builder()
-                .name(name)
-                .content(content)
+                .name(articleForm.getName())
+                .content(articleForm.getContent())
                 .build();
         articleRepository.insert(article);
         return "redirect:/bbs";
@@ -62,19 +67,20 @@ public class ArticleController {
     /**
      * コメントを投稿する.
      *
-     * @param model     モデル
-     * @param name      コメント者名
-     * @param content   コメント内容
-     * @param articleId コメント先の投稿ID
+     * @param articleForm   投稿フォーム
+     * @param commentForm   コメントフォーム
+     * @param commentResult コメントエラーリスト
+     * @param model         モデル
      * @return 記事一覧
      */
-    @PostMapping("post-comment")
-    public String postComment(Model model, String name, String content, int articleId) {
-        Comment comment = Comment.builder()
-                .name(name)
-                .content(content)
-                .articleId(articleId)
-                .build();
+    @PostMapping("insert-comment")
+    public String insertComment(ArticleForm articleForm, @Validated CommentForm commentForm, BindingResult commentResult, Model model) {
+        if (commentResult.hasErrors()) {
+            return index(model, articleForm, commentForm);
+        }
+        Comment comment = new Comment();
+        BeanUtils.copyProperties(commentForm, comment);
+        comment.setArticleId(Integer.valueOf(commentForm.getArticleId()));
         commentRepository.insert(comment);
         return "redirect:/bbs";
     }
@@ -88,8 +94,7 @@ public class ArticleController {
      */
     @PostMapping("delete-article")
     public String deleteArticle(Model model, String id) {
-        commentRepository.deleteByArticleId(Integer.valueOf(id));
-        articleRepository.deleteById(Integer.parseInt(id));
+        articleRepository.deleteByArticleId(Integer.parseInt(id));
         return "redirect:/bbs";
     }
 }
